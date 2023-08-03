@@ -1,26 +1,53 @@
-var http = require("http");
-var hostname = "127.0.0.1";
-var port = "8080";
+const cors = require("cors");
+const express = require("express");
+const app = express();
+const port = "8080";
 
-const server = http.createServer(function (req, res) {
-  const path = req.url;
-  const method = req.method;
-  if (path === "/products") {
-    if (method === "GET") {
-      res.writeHead(200, { "Content-Type": "application/json" });
-      const products = JSON.stringify([
-        {   
-          name: "독버섯 조명",
-          price: 89000,
-        },
-      ]);
-      res.end(products);
-    } else if (method === "POST") {
-      res.end("생성되었습니다");
-    }
-  }
-  res.end("Good Bye");
+app.use(express.json());
+app.use(cors()); // 브라우저의 cors 이슈를 막기 위해 사용하는 코드
+app.get("/products", (req, res) => {
+  const query = req.query;
+  console.log("queryString :", query);
+  res.send({
+    products: [
+      {
+        name: "독버섯 조명",
+        price: 89000,
+        seller: "유니스의 정원",
+        imageUrl: "img/products/products01.jpg",
+        id: 0,
+      },
+      {
+        name: "허리박살의자",
+        price: 819000,
+        seller: "유니스의 정원",
+        imageUrl: "img/products/products02.jpg",
+        id: 1,
+      },
+      {
+        name: "구불구불거울",
+        price: 1809000,
+        seller: "더휴먼",
+        imageUrl: "img/products/products03.jpg",
+        id: 2,
+      },
+    ],
+  });
 });
-server.listen(port, hostname);
 
-console.log("server on");
+app.post("/products", (req, res) => {
+  const body = req.body;
+  res.send({
+    body,
+  });
+});
+
+app.get("/products/:id", (req, res) => {
+  const params = req.params;
+  const { id } = params;
+  res.send(`id는  ${id} 입니둥`);
+});
+
+app.listen(port, () => {
+  console.log("server on");
+});
