@@ -1,3 +1,5 @@
+// server.js
+
 const express = require("express");
 const cors = require("cors");
 const app = express();
@@ -16,8 +18,48 @@ const upload = multer({
 });
 
 app.use(express.json());
-app.use(cors()); // 브라우저의 CORS 이슈를 막기 위해 사용하는 코드
+app.use(cors());
 app.use("/uploads", express.static("uploads"));
+
+// Sequelize 모델에 password 필드 추가
+const Product = models.Product;
+Product.init(
+  {
+    name: {
+      type: DataTypes.STRING(20),
+      allowNull: false,
+    },
+    price: {
+      type: DataTypes.INTEGER(10),
+      allowNull: false,
+    },
+    description: {
+      type: DataTypes.STRING(300),
+      allowNull: false,
+    },
+    imageUrl: {
+      type: DataTypes.STRING(300),
+      allowNull: false,
+    },
+    seller: {
+      type: DataTypes.STRING(30),
+      allowNull: false,
+    },
+    soldout: {
+      type: DataTypes.INTEGER(1),
+      allowNull: false,
+      defaultValue: 0,
+    },
+    password: {
+      type: DataTypes.STRING,
+      allowNull: false,
+    },
+  },
+  {
+    sequelize: models.sequelize,
+    modelName: "Product",
+  }
+);
 
 app.get("/products", (req, res) => {
   models.Product.findAll({
@@ -38,8 +80,8 @@ app.get("/products", (req, res) => {
 
 app.post("/products", (req, res) => {
   const body = req.body;
-  const { name, description, seller, price, imageUrl } = body;
-  if (!name || !description || !seller || !price || !imageUrl) {
+  const { name, description, seller, price, imageUrl, password } = body;
+  if (!name || !description || !seller || !price || !imageUrl || !password) {
     res.send("모든 필드를 입력해주세요");
   }
   models.Product.create({
@@ -48,6 +90,7 @@ app.post("/products", (req, res) => {
     seller,
     price,
     imageUrl,
+    password, // 비밀번호도 함께 저장합니다.
   })
     .then((result) => {
       console.log("상품생성 결과:", result);
@@ -122,27 +165,30 @@ app.delete("/products/:id", (req, res) => {
     });
 });
 
-const passwords = {
-  // 임의의 제품 ID와 비밀번호를 매핑한 데이터
-  1: 159298,
-  // ... 추가적인 제품 ID와 비밀번호 매핑 데이터
-};
-
 app.post("/products/:id/verify-password", (req, res) => {
   const { id } = req.params;
   const { password } = req.body;
 
-  // 제품 ID에 해당하는 비밀번호를 데이터베이스에서 가져옵니다.
-  const correctPassword = passwords[id];
+  models.Product.findOne({
+    where: {
+      id,
+    },
+  })
+    .then((product) => {
+      if (!product) {
+        return res.status(404).send("제품을 찾을 수 없습니다.");
+      }
 
-  // 입력받은 비밀번호와 저장된 비밀번호를 비교하여 검증합니다.
-  if (password !== correctPassword) {
-    // 비밀번호가 일치하지 않는 경우 403 상태코드와 메시지를 응답합니다.
-    return res.status(403).send("비밀번호가 일치하지 않습니다.");
-  }
+      if (password !== product.password) {
+        return res.status(403).send("비밀번호가 일치하지 않습니다.");
+      }
 
-  // 비밀번호가 일치하는 경우 200 상태코드를 응답합니다.
-  res.sendStatus(200);
+      res.sendStatus(200);
+    })
+    .catch((error) => {
+      console.error(error);
+      res.status(500).send("에러발생");
+    });
 });
 
 app.post("/image", upload.single("image"), (req, res) => {
