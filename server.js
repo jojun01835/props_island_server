@@ -110,6 +110,26 @@ app.post("/purchase/:id", (req, res) => {
     });
 });
 
+app.delete("/products/:id", (req, res) => {
+  const { id } = req.params;
+  models.Product.destroy({
+    where: {
+      id,
+    },
+  })
+    .then((rowsDeleted) => {
+      if (rowsDeleted > 0) {
+        res.send(`제품 ID ${id}가 삭제되었습니다.`);
+      } else {
+        res.send(`제품 ID ${id}를 찾을 수 없습니다.`);
+      }
+    })
+    .catch((error) => {
+      console.error("제품 삭제 중 에러 발생:", error);
+      res.status(500).send("제품 삭제 중 에러가 발생했습니다.");
+    });
+});
+
 app.post("/image", upload.single("image"), (req, res) => {
   const file = req.file;
   res.send({
