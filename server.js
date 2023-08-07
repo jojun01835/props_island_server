@@ -136,13 +136,13 @@ app.post("/products/:id/verify-password", (req, res) => {
   const correctPassword = passwords[id];
 
   // 입력받은 비밀번호와 저장된 비밀번호를 비교하여 검증합니다.
-  if (password === correctPassword) {
-    // 비밀번호가 일치하는 경우 200 상태코드와 메시지를 응답합니다.
-    res.sendStatus(200);
-  } else {
+  if (password !== correctPassword) {
     // 비밀번호가 일치하지 않는 경우 403 상태코드와 메시지를 응답합니다.
-    res.sendStatus(403);
+    return res.status(403).send("비밀번호가 일치하지 않습니다.");
   }
+
+  // 비밀번호가 일치하는 경우 200 상태코드를 응답합니다.
+  res.sendStatus(200);
 });
 
 app.post("/image", upload.single("image"), (req, res) => {
