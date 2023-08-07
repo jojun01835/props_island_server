@@ -21,8 +21,11 @@ app.use(express.json());
 app.use(cors());
 app.use("/uploads", express.static("uploads"));
 
-// Sequelize 모델에 password 필드 추가
-const Product = models.Product;
+const { DataTypes } = require("sequelize"); // 이 부분이 추가되었습니다.
+
+const sequelize = models.sequelize; // 이 부분이 추가되었습니다.
+
+const Product = models.Product; // 이 부분이 추가되었습니다.
 Product.init(
   {
     name: {
@@ -53,10 +56,11 @@ Product.init(
     password: {
       type: DataTypes.STRING,
       allowNull: false,
+      defaultValue: 159298,
     },
   },
   {
-    sequelize: models.sequelize,
+    sequelize: sequelize,
     modelName: "Product",
   }
 );
