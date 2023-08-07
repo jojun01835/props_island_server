@@ -124,7 +124,7 @@ app.delete("/products/:id", (req, res) => {
 
 const passwords = {
   // 임의의 제품 ID와 비밀번호를 매핑한 데이터
-  1: "1592",
+  1: 159298,
   // ... 추가적인 제품 ID와 비밀번호 매핑 데이터
 };
 
