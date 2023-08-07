@@ -110,7 +110,7 @@ app.post("/purchase/:id", (req, res) => {
     });
 });
 
-app.delete("/products/:id", (req, res) => {
+app.delete("/ProductPage/:id", (req, res) => {
   const { id } = req.params;
   models.Product.destroy({
     where: {
